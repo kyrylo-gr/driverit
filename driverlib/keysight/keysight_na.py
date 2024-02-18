@@ -3,7 +3,7 @@ import time
 import numpy as np
 from pyvisa import VisaIOError
 
-from .visa_driver import VisaDriver
+from ..visa_driver import VisaDriver
 
 
 class KeysightNA(VisaDriver):

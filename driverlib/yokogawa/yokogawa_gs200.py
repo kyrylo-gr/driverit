@@ -1,6 +1,6 @@
 from typing import Literal
 
-from .visa_driver import ONOFF_TYPE, VisaDriver
+from ..visa_driver import ONOFF_TYPE, VisaDriver
 
 
 class YokogawaGS200(VisaDriver):
@@ -9,12 +9,17 @@ class YokogawaGS200(VisaDriver):
     This class provides an interface to control and query the Yokogawa GS200, including setting its operation mode,
     output state, output range, and output level. The device can operate in either current or voltage mode.
 
-    Attributes:
-        mode (Literal["current", "voltage"]): The operation mode of the GS200, either 'current' or 'voltage'.
+    Usage:
+    -------
+    ```
 
-    Args:
-        resource_location (str): The VISA resource name used to connect to the device.
-        mode (Literal["current", "voltage"], optional): The initial operation mode of the GS200. Defaults to 'voltage'.
+    from driverlib.yokogawa import YokogawaGS200
+
+    yoko = YokogawaGS200()
+
+    yoko.output = True
+    yoko.voltage = 1.0
+    ```
 
     """
 
@@ -34,15 +39,6 @@ class YokogawaGS200(VisaDriver):
         """
         super().__init__(resource_location=resource_location)
         self.mode = mode
-
-    @property
-    def idn(self) -> str:
-        """Retrieve the identification string of the Yokogawa GS200.
-
-        Returns:
-            str: The identification string of the device.
-        """
-        return self.ask("*IDN?")
 
     def get_output(self) -> bool:
         """Query the output state of the Yokogawa GS200.

@@ -1,4 +1,4 @@
-from .visa_driver import VisaDriver
+from ..visa_driver import VisaDriver
 
 
 class Anapico(VisaDriver):

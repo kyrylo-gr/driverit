@@ -19,4 +19,4 @@ Some instruments have interface closer to other, so there is probably more.
 
 ## Yokogawa
 
-- [Yokogawa](yokogawa_gs200.md)
+- [Yokogawa GS200](yokogawa_gs200.md)
