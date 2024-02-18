@@ -1,7 +1,7 @@
-# Yokogawa GS200
+# Keysight Network Analyzer
 
 <!-- prettier-ignore -->
-::: driverlib.visa.yokogawa_gs200.YokogawaGS200
+::: driverlib.visa.keysight_na.KeysightNA
     options:
       show_bases: false
       show_root_heading: false

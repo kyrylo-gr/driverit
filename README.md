@@ -1,5 +1,5 @@
 <h1 align="center"> 
-Driver LIB.
+<img src="docs/images/driverlib-logo.png" width="400">
 </h1><br>
 
 <div align="center">

@@ -51,7 +51,7 @@ plugins:
             show_symbol_type_toc: true
             docstring_style: google
             docstring_section_style: table
-            # members_order: source
+            members_order: source
             show_signature: true
             show_signature_annotations: false
             separate_signature: true
