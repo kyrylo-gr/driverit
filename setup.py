@@ -7,7 +7,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="driverlib",
-    version="0.0.1",
+    version="0.0.2",
     author="LKB",
     author_email="cryo.paris.su@gmail.com",
     description="Control your instruments via USB or LAN.",
