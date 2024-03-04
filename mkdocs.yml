@@ -22,6 +22,7 @@ theme:
     - navigation.sections
     - search.suggest
     - search.highlight
+copyright: Library published by <a href="//kyrylo.gr/" target="_blank">kyrylo.gr</a> © 2024
 extra_css:
   - stylesheets/extra.css
 
@@ -49,8 +50,8 @@ plugins:
             show_root_toc_entry: false
             show_root_full_path: true
             show_object_full_path: false
-            show_symbol_type_heading: true
-            show_symbol_type_toc: false
+            show_symbol_type_heading: false
+            show_symbol_type_toc: true
             docstring_style: google
             docstring_section_style: table
             members_order: source

@@ -47,7 +47,7 @@ class Anapico(VisaDriver):
         self.write(f":SOURce{int(channel)}:FREQuency:CW {float(value)}")
         return self
 
-    frequency = property(get_frequency, set_frequency)
+    frequency = property(get_frequency, set_frequency)  # type: ignore
 
     def get_power(self, channel):
         """Query the power of a specified channel.
@@ -78,7 +78,7 @@ class Anapico(VisaDriver):
         self.write(f":SOURce{int(channel)}:POWER {float(value)}")
         return self
 
-    power = property(get_power, set_power)
+    power = property(get_power, set_power)  # type: ignore
 
     def get_rf_state(self, channel):
         """Query the RF output state of a specified channel.
@@ -92,7 +92,7 @@ class Anapico(VisaDriver):
         return int(self.ask(f"OUTPut{int(channel)}:STATE?")[:1])
 
     def set_rf_state(self, channel, state):
-        """Set the RF output state of a specified channel.
+        """Sets the RF output state of a specified channel.
 
         Args:
             channel: The channel number.
@@ -108,4 +108,4 @@ class Anapico(VisaDriver):
         self.write(f"OUTPut{int(channel)}:STATE {state}")
         return self
 
-    rf_state = property(get_rf_state, set_rf_state)
+    rf_state = property(get_rf_state, set_rf_state)  # type: ignore
