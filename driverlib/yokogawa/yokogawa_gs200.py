@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, Optional
 
 from ..visa_driver import ONOFF_TYPE, VisaDriver
 
@@ -79,20 +79,45 @@ class YokogawaGS200(VisaDriver):
 
     range = property(get_range, set_range)
 
-    def set_level(self, value: float):
+    def set_level(self, value: float, check_mode: Optional[str] = None):
         """Set the output level of the Yokogawa GS200.
 
         Args:
             value (float): The desired output level.
         """
+        if check_mode is not None and self.mode != check_mode:
+            raise TypeError(
+                f"Yoko is configured in {self.mode} mode, while it should be {check_mode}"
+            )
+
         self.write(f":SOURce:Level {value:.4f}")
 
-    def get_level(self) -> float:
+    def get_level(self, check_mode: Optional[str] = None) -> float:
         """Query the output level of the Yokogawa GS200.
 
         Returns:
             float: The current output level of the device.
         """
+        if check_mode is not None and self.mode != check_mode:
+            raise TypeError(
+                f"Yoko is configured in {self.mode} mode, while it should be {check_mode}"
+            )
         return float(self.ask(":SOURce:Level?"))
 
     level = property(get_level, set_level)
+
+    def get_voltage(self):
+        return self.get_level("voltage")
+
+    def set_voltage(self, value):
+        return self.set_level(value, "voltage")
+
+    voltage = property(get_voltage, set_voltage)
+
+    def get_current(self):
+        return self.get_level("current")
+
+    def set_current(self, value):
+        return self.set_level(value, "current")
+
+    current = property(get_current, set_current)

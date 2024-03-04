@@ -33,7 +33,9 @@ class OpenResource:
         self.timeout = timeout
 
     def __enter__(self) -> Resource:
-        self._resource = self.rm.open_resource(self.resource_location, open_timeout=1000)
+        self._resource = self.rm.open_resource(
+            self.resource_location, open_timeout=1000
+        )
         self._resource.write_termination = self.write_termination
         if self.timeout is not None:
             self._resource.timeout = self.timeout
@@ -46,8 +48,10 @@ class OpenResource:
 class VisaDriver(LimitedAttributeSetter):
 
     _possible_names: Optional[List[str]]
+    _allow_attrs = ["rm", "resource_location", "endline"]
 
     def __init__(self, resource_location=None, endline="", check: bool = False):
+        self.endline = endline
         if sys.platform.startswith("linux"):
             self.rm = ResourceManager("@py")
         elif sys.platform.startswith("win32"):
@@ -55,12 +59,11 @@ class VisaDriver(LimitedAttributeSetter):
         else:
             self.rm = ResourceManager()
 
-        if resource_location is not None:
+        if resource_location is None:
             self.lookup_resources()
             return
 
         self.resource_location = resource_location
-        self.endline = endline
 
         if logger.level <= logging.DEBUG or check:
             logger.debug("Connected to %s", self.ask("*IDN?"))
@@ -156,4 +159,6 @@ class VisaDriver(LimitedAttributeSetter):
             except VisaIOError:
                 idn = None
 
-            print(f"Resource named: {idn if idn else 'Unable to determine'} @ '{location}'")
+            print(
+                f"Resource named: {idn if idn else 'Unable to determine'} @ '{location}'"
+            )

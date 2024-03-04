@@ -1,4 +1,5 @@
 from ..visa_driver import VisaDriver
+from ..types import ONOFF_TYPE
 
 
 class RhodeSchwarzSource(VisaDriver):
@@ -54,11 +55,11 @@ class RhodeSchwarzSource(VisaDriver):
         Args:
             value (float): The desired frequency in Hz.
         """
-        self.write(":FREQ " + str(value))
+        self.write(f":FREQ {value:.0f}")
 
     frequency = property(get_frequency, set_frequency)
 
-    def get_output(self):
+    def get_output(self) -> True:
         """Query the output state of the signal generator.
 
         Returns:
@@ -66,11 +67,11 @@ class RhodeSchwarzSource(VisaDriver):
         """
         return bool(int(self.ask("OUTP?")))
 
-    def set_output(self, value):
+    def set_output(self, value: ONOFF_TYPE):
         """Set the output state of the signal generator.
 
         Args:
-            value (bool): The desired output state. True to enable the output, False to disable it.
+            value (bool | ON | OFF | 0 | 1): The desired output state. True to enable the output, False to disable it.
         """
         if self._value_to_bool(value):
             self.write(":OUTP ON")
