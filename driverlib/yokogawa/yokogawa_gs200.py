@@ -15,7 +15,7 @@ class YokogawaGS200(VisaDriver):
 
     from driverlib.yokogawa import YokogawaGS200
 
-    yoko = YokogawaGS200()
+    yoko = YokogawaGS200("address")
 
     yoko.output = True
     yoko.voltage = 1.0
