@@ -30,7 +30,7 @@ class KeysightNA(VisaDriver):
     def set_power(self, power):
         if power < -15:
             raise ValueError("Minimum power is -15 dBm")
-        elif power > -5:
+        elif power > 0:
             raise ValueError("Maximum power is -5 dBm")
         self.write(f":SOUR1:POW {power}")
 
@@ -55,6 +55,11 @@ class KeysightNA(VisaDriver):
         else:
             self.write(f"SENS1:BWID {int(if_bw)}")
 
+    def get_if_bw(self):
+        return float(self.ask("SENS1:BWID?"))
+
+    if_bw = property(get_if_bw, set_if_bw)
+
     def set_averaging(self, n_ave: int):
         if n_ave == 1:
             self.write(":SENS1:AVER OFF")
@@ -73,6 +78,10 @@ class KeysightNA(VisaDriver):
         self.write(":TRIG:SOUR INT")
         self.write(":INIT1:CONT ON")
 
+    def setup_trigger_for_sweep(self):
+        self.write(":INIT1:CONT ON")
+        self.write(":TRIG:SOUR BUS")
+
     def setup_sweep(
         self,
         f_min: float,
@@ -83,10 +92,9 @@ class KeysightNA(VisaDriver):
         n_ave: int = 1,
         meas: str = "S21",
     ):
-        self.write("*RST")
+        # self.write("*RST")
 
-        self.write(":INIT1:CONT ON")
-        self.write(":TRIG:SOUR BUS")
+        self.setup_trigger_for_sweep()
 
         assert meas in ["S11", "S21"]  # , "S12", "S22"]
         self.write(f":CALC:PAR:DEF {meas}")
@@ -99,8 +107,34 @@ class KeysightNA(VisaDriver):
     def measure(self, *args, **kwargs):
         if kwargs:
             self.setup_sweep(*args, **kwargs)
+        else:
+            self.setup_trigger_for_sweep()
         self.write(":TRIG:SING")
         while not self.is_completed():
             time.sleep(1e-3)
         data = self.get_curve()
         return data
+
+    def get_output(self) -> True:
+        """Query the output state of the signal generator.
+
+        Returns:
+            bool: True if the output is enabled, False otherwise.
+        """
+        return bool(int(self.ask("OUTP?")))
+
+    def set_output(self, value):
+        """Set the output state of the signal generator.
+
+        Args:
+            value (bool | ON | OFF | 0 | 1): The desired output state. True to enable the output, False to disable it.
+        """
+        if self._value_to_bool(value):
+            self.write(":OUTP ON")
+        else:
+            self.write(":OUTP OFF")
+
+    output = property(get_output, set_output)
+
+    def get_sweep_time(self):
+        return float(self.ask(":SENS1:SWE:TIME?"))
