@@ -33,9 +33,7 @@ class OpenResource:
         self.timeout = timeout
 
     def __enter__(self) -> Resource:
-        self._resource = self.rm.open_resource(
-            self.resource_location, open_timeout=1000
-        )
+        self._resource = self.rm.open_resource(self.resource_location, open_timeout=1000)
         self._resource.write_termination = self.write_termination
         if self.timeout is not None:
             self._resource.timeout = self.timeout
@@ -78,13 +76,13 @@ class VisaDriver(LimitedAttributeSetter):
         with OpenResource(
             self.rm, self.resource_location, self.endline, timeout=timeout
         ) as resource:
-            return resource.query(message)
+            return resource.query(message).strip()
 
     def read(self, timeout=None) -> str:
         with OpenResource(
             self.rm, self.resource_location, self.endline, timeout=timeout
         ) as resource:
-            return resource.read()
+            return resource.read().strip()
 
     def write_and_read(self, message, timeout=None) -> str:
         with OpenResource(
@@ -159,6 +157,4 @@ class VisaDriver(LimitedAttributeSetter):
             except VisaIOError:
                 idn = None
 
-            print(
-                f"Resource named: {idn if idn else 'Unable to determine'} @ '{location}'"
-            )
+            print(f"Resource named: {idn if idn else 'Unable to determine'} @ '{location}'")

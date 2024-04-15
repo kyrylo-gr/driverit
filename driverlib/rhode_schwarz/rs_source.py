@@ -1,5 +1,5 @@
-from ..visa_driver import VisaDriver
 from ..types import ONOFF_TYPE
+from ..visa_driver import VisaDriver
 
 
 class RhodeSchwarzSource(VisaDriver):
@@ -79,3 +79,30 @@ class RhodeSchwarzSource(VisaDriver):
             self.write(":OUTP OFF")
 
     output = property(get_output, set_output)
+
+    def get_modulation(self) -> True:
+        """Turn on or off the modulation output state of the signal generator.
+
+        Args:
+            value (bool | ON | OFF | 0 | 1): The desired output state. True to enable the output, False to disable it.
+        """
+        return bool(int(self.ask("MOD:STAT?")))
+
+    def set_modulation(self, value: ONOFF_TYPE):
+        """Turn on or off the modulation output state of the signal generator.
+
+        Args:
+            value (bool | ON | OFF | 0 | 1): The desired output state. True to enable the output, False to disable it.
+        """
+        if self._value_to_bool(value):
+            self.write("MOD:STAT ON")
+        else:
+            self.write("MOD:STAT OFF")
+
+    modulation = property(get_modulation, set_modulation)
+
+    def set_modulation_frequency(self, value: float):
+        self.write(f"LFO1:FREQ {value}")
+
+    def get_modulation_frequency(self):
+        return float(self.ask(f"LFO1:FREQ?"))

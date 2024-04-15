@@ -81,7 +81,7 @@ class AgilentSA(VisaDriver):
         Returns:
             int: The RBW in Hz.
         """
-        return int(self.ask(":BANDwidth:RESolution?"))
+        return int(float(self.ask(":BANDwidth:RESolution?")))
 
     def set_rbw(self, value: int):
         """Set the resolution bandwidth (RBW) of the spectrum analyzer.
@@ -99,7 +99,7 @@ class AgilentSA(VisaDriver):
         Returns:
             int: The VBW in Hz.
         """
-        return int(self.ask(":BANDwidth:VIDeo?"))
+        return int(float(self.ask(":BANDwidth:VIDeo?")))
 
     def set_vbw(self, value: int):
         """Set the video bandwidth (VBW) of the spectrum analyzer.
@@ -218,7 +218,7 @@ class AgilentSA(VisaDriver):
         # Calculate the frequency points corresponding to each data point in the trace
         freqs = np.linspace(center - span / 2, center + span / 2, len(data))
 
-        return data, freqs
+        return freqs, data
 
     def get_max_point(self, marker: int = 1) -> float:
         """Find the maximum point on the specified marker and returns its frequency.
