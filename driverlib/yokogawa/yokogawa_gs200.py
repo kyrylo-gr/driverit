@@ -90,7 +90,7 @@ class YokogawaGS200(VisaDriver):
                 f"Yoko is configured in {self.mode} mode, while it should be {check_mode}"
             )
 
-        self.write(f":SOURce:Level {value:.4f}")
+        self.write(f":SOURce:Level {value:.8f}")
 
     def get_level(self, check_mode: Optional[str] = None) -> float:
         """Query the output level of the Yokogawa GS200.
