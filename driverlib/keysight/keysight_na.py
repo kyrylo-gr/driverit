@@ -1,4 +1,5 @@
 import time
+from typing import Optional
 
 import numpy as np
 from pyvisa import VisaIOError
@@ -28,8 +29,8 @@ class KeysightNA(VisaDriver):
         return float(self.ask(":SOUR1:POW?"))
 
     def set_power(self, power):
-        if power < -15:
-            raise ValueError("Minimum power is -15 dBm")
+        if power < -20:
+            raise ValueError("Minimum power is -20 dBm")
         elif power > 0:
             raise ValueError("Maximum power is -5 dBm")
         self.write(f":SOUR1:POW {power}")
@@ -49,11 +50,10 @@ class KeysightNA(VisaDriver):
         self.write(f":SENS1:FREQ:STOP {f_max}")
         self.write(f":SENS1:SWE:POIN {n_freq}")
 
-    def set_if_bw(self, if_bw: float):
+    def set_if_bw(self, if_bw: Optional[int] = None):
         if if_bw is None:
-            self.write("SENS1:BWA")
-        else:
-            self.write(f"SENS1:BWID {int(if_bw)}")
+            return self.write("SENS1:BWA")
+        self.write(f"SENS1:BWID {int(if_bw)}")
 
     def get_if_bw(self):
         return float(self.ask("SENS1:BWID?"))
@@ -61,7 +61,8 @@ class KeysightNA(VisaDriver):
     if_bw = property(get_if_bw, set_if_bw)
 
     def set_averaging(self, n_ave: int):
-        if n_ave == 1:
+        n_ave = int(n_ave)
+        if n_ave <= 1:
             self.write(":SENS1:AVER OFF")
         else:
             self.write(":SENS1:AVER ON")
@@ -88,7 +89,7 @@ class KeysightNA(VisaDriver):
         f_max: float,
         n_freq: int,
         power: float,
-        if_bw: int = None,
+        if_bw: Optional[int] = None,
         n_ave: int = 1,
         meas: str = "S21",
     ):
@@ -115,7 +116,7 @@ class KeysightNA(VisaDriver):
         data = self.get_curve()
         return data
 
-    def get_output(self) -> True:
+    def get_output(self) -> bool:
         """Query the output state of the signal generator.
 
         Returns:

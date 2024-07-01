@@ -1,3 +1,5 @@
+from typing import Literal
+
 from ..types import ONOFF_TYPE
 from ..visa_driver import VisaDriver
 
@@ -59,7 +61,7 @@ class RhodeSchwarzSource(VisaDriver):
 
     frequency = property(get_frequency, set_frequency)
 
-    def get_output(self) -> True:
+    def get_output(self) -> bool:
         """Query the output state of the signal generator.
 
         Returns:
@@ -80,11 +82,11 @@ class RhodeSchwarzSource(VisaDriver):
 
     output = property(get_output, set_output)
 
-    def get_modulation(self) -> True:
-        """Turn on or off the modulation output state of the signal generator.
+    def get_modulation(self) -> bool:
+        """Query the modulation state the signal generator.
 
-        Args:
-            value (bool | ON | OFF | 0 | 1): The desired output state. True to enable the output, False to disable it.
+        Returns:
+            bool: True if the modulation output is enabled, False otherwise.
         """
         return bool(int(self.ask("MOD:STAT?")))
 
@@ -101,8 +103,85 @@ class RhodeSchwarzSource(VisaDriver):
 
     modulation = property(get_modulation, set_modulation)
 
+    def get_modulation_frequency(self):
+        """Get the modulation frequency of the signal generator.
+
+        Returns:
+            float: Frequency of the modulation in Hz.
+        """
+        return float(self.ask("LFO1:FREQ?"))
+
     def set_modulation_frequency(self, value: float):
+        """Set the modulation frequency of the signal generator.
+
+        Args:
+            value (float): The desired modulation frequency in Hz.
+        """
         self.write(f"LFO1:FREQ {value}")
 
-    def get_modulation_frequency(self):
-        return float(self.ask(f"LFO1:FREQ?"))
+    modulation_frequency = property(get_modulation_frequency, set_modulation_frequency)
+
+    def get_phase_modulation_state(self):
+        """Query the phase modulation state of the signal generator.
+
+        Returns:
+            bool: True if phase modulation is enabled, False otherwise.
+        """
+        return bool(int(self.ask("PM:STAT?")))
+
+    def set_phase_modulation_state(self, value: ONOFF_TYPE):
+        """Set the phase modulation state of the signal generator.
+
+        Args:
+            value (bool | ON | OFF | 0 | 1): The desired phase modulation state.
+                True to enable phase modulation, False to disable it.
+        """
+        if self._value_to_bool(value):
+            self.write("PM:STAT ON")
+        else:
+            self.write("PM:STAT OFF")
+
+    phase_modulation = property(get_phase_modulation_state, set_phase_modulation_state)
+
+    def set_amplitude_modulation_state(self, value: ONOFF_TYPE):
+        """Set the amplitude modulation state of the signal generator.
+
+        Args:
+            value (bool | ON | OFF | 0 | 1): The desired amplitude modulation state.
+                True to enable amplitude modulation, False to disable it.
+        """
+        if self._value_to_bool(value):
+            self.write("AM:STAT ON")
+        else:
+            self.write("AM:STAT OFF")
+
+    def get_amplitude_modulation_state(self):
+        """Query the amplitude modulation state of the signal generator.
+
+        Returns:
+            bool: True if amplitude modulation is enabled, False otherwise.
+        """
+        return bool(int(self.ask("AM:STAT?")))
+
+    amplitude_modulation = property(get_amplitude_modulation_state, set_amplitude_modulation_state)
+
+    def set_phase_modulation_source(self, value: Literal["INT", "EXT"]):
+        """Set the phase modulation source of the signal generator.
+
+        Args:
+            value (Literal["INT", "EXT"]): The desired phase modulation source.
+                Must be either "INT" or "EXT".
+        """
+        if value not in {"INT", "EXT"}:
+            raise ValueError("Invalid value. Must be 'INT' or 'EXT'")
+        self.write(f"PM:SOUR {value}")
+
+    def get_phase_modulation_source(self):
+        """Query the phase modulation source of the signal generator.
+
+        Returns:
+            str: The current phase modulation source. Either "INT" or "EXT".
+        """
+        return self.ask("PM:SOUR?")
+
+    phase_modulation_source = property(get_phase_modulation_source, set_phase_modulation_source)

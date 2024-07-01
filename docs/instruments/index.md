@@ -20,3 +20,7 @@ Some instruments have interface closer to other, so there is probably more.
 ## Yokogawa
 
 - [Yokogawa GS200](yokogawa_gs200.md)
+
+## Tektronix
+
+- [Arbitrary Waveform Generator](tektronix_afg.md)

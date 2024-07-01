@@ -34,7 +34,7 @@ class OpenResource:
 
     def __enter__(self) -> Resource:
         self._resource = self.rm.open_resource(self.resource_location, open_timeout=1000)
-        self._resource.write_termination = self.write_termination
+        self._resource.write_termination = self.write_termination  # type: ignore
         if self.timeout is not None:
             self._resource.timeout = self.timeout
         return self._resource
@@ -117,7 +117,7 @@ class VisaDriver(LimitedAttributeSetter):
 
     @property
     def idn(self) -> str:
-        """Retrieve the identification string of the Yokogawa GS200.
+        """Retrieve the identification string.
 
         Returns:
             str: The identification string of the device.

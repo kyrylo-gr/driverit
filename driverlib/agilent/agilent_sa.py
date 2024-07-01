@@ -141,7 +141,7 @@ class AgilentSA(VisaDriver):
         Returns:
             _FORMATS_TYPE: The current data format.
         """
-        return self.ask(":FORMat:TRACe:DATA?")
+        return self.ask(":FORMat:TRACe:DATA?")  # type: ignore
 
     def set_data_format(self, value: _FORMATS_TYPE = "ASCii"):
         """Set the data format for trace data from the spectrum analyzer.
