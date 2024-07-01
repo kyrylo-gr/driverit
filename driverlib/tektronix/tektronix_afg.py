@@ -352,7 +352,9 @@ class TektronixAFG(VisaDriver):
         Returns:
             float: The signal amplitude in Vpp.
         """
-        return float(self.ask(f"SOURce{self.channel_idx}:VOLTage:LEVel:IMMediate:AMPLitude?"))
+        return float(
+            self.ask(f"SOURce{self.channel_idx}:VOLTage:LEVel:IMMediate:AMPLitude?")
+        )
 
     @amplitude.setter
     def amplitude(self, val: float = 0) -> None:
@@ -362,7 +364,9 @@ class TektronixAFG(VisaDriver):
         Args:
             val (float, optional): The signal amplitude to set in Vpp. Defaults to 0.
         """
-        self.write(f"SOURce{self.channel_idx}:VOLTage:LEVel:IMMediate:AMPLitude {val:f}VPP")
+        self.write(
+            f"SOURce{self.channel_idx}:VOLTage:LEVel:IMMediate:AMPLitude {val:f}VPP"
+        )
 
     @property
     def frequency(self) -> float:
@@ -395,7 +399,9 @@ class TektronixAFG(VisaDriver):
         Returns:
             float: The phase in degrees.
         """
-        return 180.0 / np.pi * float(self.ask(f"SOURce{self.channel_idx}:PHASe:ADJust?"))
+        return (
+            180.0 / np.pi * float(self.ask(f"SOURce{self.channel_idx}:PHASe:ADJust?"))
+        )
 
     @phase.setter
     def phase(self, value: float = 0) -> None:
@@ -415,7 +421,9 @@ class TektronixAFG(VisaDriver):
         Returns:
             float: The offset.
         """
-        return float(self.ask(f"SOURce{self.channel_idx}:VOLTage:LEVel:IMMediate:OFFSet?"))
+        return float(
+            self.ask(f"SOURce{self.channel_idx}:VOLTage:LEVel:IMMediate:OFFSet?")
+        )
 
     @offset.setter
     def offset(self, val: float = 0) -> None:
@@ -432,7 +440,9 @@ class TektronixAFG(VisaDriver):
         Returns:
             float: The high value for voltage.
         """
-        return float(self.ask(f"SOURce{self.channel_idx}:VOLTage:LEVel:IMMediate:HIGH?"))
+        return float(
+            self.ask(f"SOURce{self.channel_idx}:VOLTage:LEVel:IMMediate:HIGH?")
+        )
 
     @high.setter
     def high(self, value: float = 0) -> None:

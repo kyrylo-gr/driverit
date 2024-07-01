@@ -1,95 +1,45 @@
 import logging
-import sys
 from typing import List, Optional
 
-from pyvisa import VisaIOError
-from pyvisa.highlevel import ResourceManager
-from pyvisa.resources import Resource
-
+from ._backend_manager import BackendProtocol, get_backend
 from .types import ONOFF_TYPE
 from .utils import LimitedAttributeSetter
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
+class VisaDriver(LimitedAttributeSetter):
+    backend: BackendProtocol
 
-class OpenResource:
-    rm: ResourceManager
-    resource_location: str
-    write_termination: str
-    _resource: Resource
-    timeout: Optional[int]
+    _possible_names: Optional[List[str]]
+    _allow_attrs = ["logger", "backend"]
 
     def __init__(
         self,
-        rm: ResourceManager,
-        resource_location,
-        write_termination="\n",
-        timeout: Optional[int] = None,
+        resource_location=None,
+        endline="",
+        check: bool = False,
+        logger: Optional[logging.Logger] = None,
     ):
-        self.rm = rm
-        self.resource_location = resource_location
-        self.write_termination = write_termination
-        self.timeout = timeout
+        if logger is None:
+            logger = logging.getLogger(__name__)
+            logger.setLevel(logging.INFO)
+        self.logger = logger
 
-    def __enter__(self) -> Resource:
-        self._resource = self.rm.open_resource(self.resource_location, open_timeout=1000)
-        self._resource.write_termination = self.write_termination  # type: ignore
-        if self.timeout is not None:
-            self._resource.timeout = self.timeout
-        return self._resource
+        self.backend: BackendProtocol = get_backend()(
+            resource_location, endline, check=check, logger=logger
+        )
 
-    def __exit__(self, *args):
-        self._resource.close()
-
-
-class VisaDriver(LimitedAttributeSetter):
-
-    _possible_names: Optional[List[str]]
-    _allow_attrs = ["rm", "resource_location", "endline"]
-
-    def __init__(self, resource_location=None, endline="", check: bool = False):
-        self.endline = endline
-        if sys.platform.startswith("linux"):
-            self.rm = ResourceManager("@py")
-        elif sys.platform.startswith("win32"):
-            self.rm = ResourceManager()
-        else:
-            self.rm = ResourceManager()
-
-        if resource_location is None:
-            self.lookup_resources()
-            return
-
-        self.resource_location = resource_location
-
-        if logger.level <= logging.DEBUG or check:
-            logger.debug("Connected to %s", self.ask("*IDN?"))
-
-    def write(self, message, timeout=None):
-        with OpenResource(
-            self.rm, self.resource_location, self.endline, timeout=timeout
-        ) as resource:
-            resource.write(message)  # + "\n")
+    def write(self, message: str, timeout=None):
+        self.backend.write(message, timeout=timeout)
 
     def ask(self, message, timeout=None) -> str:
-        with OpenResource(
-            self.rm, self.resource_location, self.endline, timeout=timeout
-        ) as resource:
-            return resource.query(message).strip()
+        return self.backend.query(message, timeout=timeout)
 
     def read(self, timeout=None) -> str:
-        with OpenResource(
-            self.rm, self.resource_location, self.endline, timeout=timeout
-        ) as resource:
-            return resource.read().strip()
+        return self.backend.read(timeout=timeout).strip()
 
     def write_and_read(self, message, timeout=None) -> str:
-        with OpenResource(
-            self.rm, self.resource_location, self.endline, timeout=timeout
-        ) as resource:
-            resource.write(message)
-            return resource.read()
+        self.backend.write(message, timeout=timeout)
+        return self.backend.read(timeout=timeout)
 
     def _value_to_bool(self, value: ONOFF_TYPE):
         if isinstance(value, bool):
@@ -113,7 +63,7 @@ class VisaDriver(LimitedAttributeSetter):
 
     def close(self):
         """Close the connection to the device."""
-        self.rm.close()
+        self.backend.close()
 
     @property
     def idn(self) -> str:
@@ -145,16 +95,3 @@ class VisaDriver(LimitedAttributeSetter):
         """Clear event register, error queue -when power is cycled-."""
         self.write("*CLS")
         self.write("*WAI")
-
-    def lookup_resources(self):
-        """Look for all the available resources."""
-        instruments = self.rm.list_resources()
-        print(f"Found {len(instruments)} instruments:")
-        for location in instruments:
-            try:
-                with OpenResource(self.rm, location, self.endline) as instr:
-                    idn = instr.query("*IDN?")
-            except VisaIOError:
-                idn = None
-
-            print(f"Resource named: {idn if idn else 'Unable to determine'} @ '{location}'")

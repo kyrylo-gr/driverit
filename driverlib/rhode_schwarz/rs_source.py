@@ -163,7 +163,9 @@ class RhodeSchwarzSource(VisaDriver):
         """
         return bool(int(self.ask("AM:STAT?")))
 
-    amplitude_modulation = property(get_amplitude_modulation_state, set_amplitude_modulation_state)
+    amplitude_modulation = property(
+        get_amplitude_modulation_state, set_amplitude_modulation_state
+    )
 
     def set_phase_modulation_source(self, value: Literal["INT", "EXT"]):
         """Set the phase modulation source of the signal generator.
@@ -184,4 +186,6 @@ class RhodeSchwarzSource(VisaDriver):
         """
         return self.ask("PM:SOUR?")
 
-    phase_modulation_source = property(get_phase_modulation_source, set_phase_modulation_source)
+    phase_modulation_source = property(
+        get_phase_modulation_source, set_phase_modulation_source
+    )

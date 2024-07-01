@@ -64,7 +64,10 @@ class RigolScopeDriver(VisaDriver):
 
 class RigolScope(RigolScopeDriver):
     def get_waveform_raw(
-        self, channels: _CHANNELS_TYPE = None, plot: bool = False, memdepth: float = None
+        self,
+        channels: _CHANNELS_TYPE = None,
+        plot: bool = False,
+        memdepth: float = None,
     ) -> np.ndarray:
         """
         Gets the waveform of a selection of channels
@@ -89,7 +92,9 @@ class RigolScope(RigolScopeDriver):
             sys.exit()
         for chan in channels:
             if chan > 4:
-                print("ERROR : Invalid channel list provided" + " (Channels are 1,2,3,4)")
+                print(
+                    "ERROR : Invalid channel list provided" + " (Channels are 1,2,3,4)"
+                )
                 sys.exit()
         if memdepth is not None:
             self.write(f":ACQuire:MDEPth {int(memdepth)}")
@@ -218,7 +223,11 @@ class RigolScope(RigolScopeDriver):
             self.write(f"WAV:STAR {memory_depth//2 - screen_points//2+1}")
             self.write(f"WAV:STOP {memory_depth//2 + screen_points//2}")
             data = self.query_binary_values(
-                ":WAV:DATA?", datatype="B", container=np.array, delay=0.5, data_points=screen_points
+                ":WAV:DATA?",
+                datatype="B",
+                container=np.array,
+                delay=0.5,
+                data_points=screen_points,
             )
             data = preamble.normalize(data)
             times = np.arange(0, len(data) * preamble.x_inc, preamble.x_inc)
@@ -273,7 +282,10 @@ class RigolScope(RigolScopeDriver):
         self.write_ascii_values(":WAV:XINC", res)
 
     def get_screenshot(
-        self, filename: str = None, format_: str = "png", image_size: Tuple[int, int] = (600, 1024)
+        self,
+        filename: str = None,
+        format_: str = "png",
+        image_size: Tuple[int, int] = (600, 1024),
     ):
         """
         Recovers a screenshot of the screen and returns the image

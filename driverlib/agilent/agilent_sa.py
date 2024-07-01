@@ -233,7 +233,12 @@ class AgilentSA(VisaDriver):
         return float(self.ask(f":CALCulate:MARKer{marker}:X?"))
 
     def set_trace_parameters_and_get(
-        self, center: float, span: float, rbw: int = 100, vbw: int = 30, swt: Optional[float] = None
+        self,
+        center: float,
+        span: float,
+        rbw: int = 100,
+        vbw: int = 30,
+        swt: Optional[float] = None,
     ) -> Tuple[np.ndarray, np.ndarray]:
         """Configure and measure.
 
