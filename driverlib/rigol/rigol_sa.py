@@ -13,7 +13,6 @@ from ..visa_driver import VisaDriver
 
 
 class RigolSA(VisaDriver):
-
     def zero_span(
         self,
         center: float = 1e6,

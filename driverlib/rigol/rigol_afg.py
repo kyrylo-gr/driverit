@@ -12,7 +12,6 @@ from ..visa_driver import VisaDriver
 
 
 class RigolAFG(VisaDriver):
-
     def get_waveform(self, output: int = 1) -> list:
         """Get the waveform type as well as its specs.
 
@@ -98,7 +97,9 @@ class RigolAFG(VisaDriver):
         if output not in [1, 2]:
             print("ERROR : Invalid output specified")
             return None
-        self.write(f":SOURce{output}:APPLy:SINusoid {freq}, {ampl}, " + f"{offset}, {phase}")
+        self.write(
+            f":SOURce{output}:APPLy:SINusoid {freq}, {ampl}, " + f"{offset}, {phase}"
+        )
         self.turn_on(output)
 
     def square(
@@ -123,7 +124,9 @@ class RigolAFG(VisaDriver):
         if output not in [1, 2]:
             print("ERROR : Invalid output specified")
             return None
-        self.write(f":SOURce{output}:APPLy:SQUare {freq}, {ampl}, " + f"{offset}, {phase}")
+        self.write(
+            f":SOURce{output}:APPLy:SQUare {freq}, {ampl}, " + f"{offset}, {phase}"
+        )
         self.write(f":SOURce{output}:FUNCtion:SQUare:DCYCle {duty}")
         self.turn_on(output)
 
@@ -149,7 +152,9 @@ class RigolAFG(VisaDriver):
         if output not in [1, 2]:
             print("ERROR : Invalid output specified")
             return None
-        self.write(f":SOURce{output}:APPLy:RAMP {freq}, {ampl}, " + f"{offset}, {phase}")
+        self.write(
+            f":SOURce{output}:APPLy:RAMP {freq}, {ampl}, " + f"{offset}, {phase}"
+        )
         self.write(f":SOURce{output}:FUNCtion:RAMP:SYMMetry {symm}")
         self.turn_on(output)
 
@@ -179,7 +184,9 @@ class RigolAFG(VisaDriver):
         if output not in [1, 2]:
             print("ERROR : Invalid output specified")
             return None
-        self.write(f":SOURce{output}:APPLy:PULSe {freq}, {ampl}, " + f"{offset}, {phase}")
+        self.write(
+            f":SOURce{output}:APPLy:PULSe {freq}, {ampl}, " + f"{offset}, {phase}"
+        )
         self.write(f":SOURce{output}:FUNCtion:PULSe:DCYCLe {duty}")
         self.write(f":SOURce{output}:FUNCtion:TRANsition:LEADing {rise}")
         self.write(f":SOURce{output}:FUNCtion:TRANsition:TRAiling {fall}")
@@ -368,5 +375,7 @@ class RigolAFG(VisaDriver):
         if function not in funcnames:
             print("ERROR : Unknwown function specified")
         self.write(f":SOURce{output}:FUNCtion {function}")
-        self.write(f":SOURce{output}:APPLy:USER {freq}, {ampl}, " + f"{offset}, {phase}")
+        self.write(
+            f":SOURce{output}:APPLy:USER {freq}, {ampl}, " + f"{offset}, {phase}"
+        )
         self.turn_on(output)

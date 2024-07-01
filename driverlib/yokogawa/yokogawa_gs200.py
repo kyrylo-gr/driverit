@@ -125,9 +125,13 @@ class YokogawaGS200(VisaDriver):
                 f"Yoko is configured in {self.mode} mode, while it should be {check_mode}"
             )
         if self.max_level is not None and value > self.max_level:
-            raise ValueError(f"Level value {value} is greater than the maximum allowed value")
+            raise ValueError(
+                f"Level value {value} is greater than the maximum allowed value"
+            )
         if self.min_level is not None and value < self.min_level:
-            raise ValueError(f"Level value {value} is smaller than the minimum allowed value")
+            raise ValueError(
+                f"Level value {value} is smaller than the minimum allowed value"
+            )
 
         self.write(f":SOURce:Level {value:.8f}")
 
@@ -149,7 +153,7 @@ class YokogawaGS200(VisaDriver):
         """Get the output voltage level."""
         return self.get_level("voltage")
 
-    def set_voltage(self, value):
+    def set_voltage(self, value: float):
         """Set the output voltage level.
 
         Args:
@@ -163,7 +167,7 @@ class YokogawaGS200(VisaDriver):
         """Get the output current level."""
         return self.get_level("current")
 
-    def set_current(self, value):
+    def set_current(self, value: float):
         """Set the output current level.
 
         Args:
@@ -191,7 +195,9 @@ class YokogawaGS200(VisaDriver):
             step = self.default_safety_step
 
         initial_voltage = self.voltage
-        if np.round(value, self._precision) == np.round(initial_voltage, self._precision):
+        if np.round(value, self._precision) == np.round(
+            initial_voltage, self._precision
+        ):
             return
 
         step = abs(step) if initial_voltage < value else -abs(step)
