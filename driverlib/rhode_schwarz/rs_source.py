@@ -106,3 +106,29 @@ class RhodeSchwarzSource(VisaDriver):
 
     def get_modulation_frequency(self):
         return float(self.ask(f"LFO1:FREQ?"))
+
+    def set_phase_mod(self, value: ONOFF_TYPE):
+        if self._value_to_bool(value):
+            self.write(f"PM:STAT ON")
+        else:
+            self.write(f"PM:STAT OFF")
+
+    def get_phase_mod(self):
+        return bool(int(self.ask(f"PM:STAT?")))
+
+    phase_mod = property(get_phase_mod, set_phase_mod)
+
+    def set_amp_mod(self, value: ONOFF_TYPE):
+        if self._value_to_bool(value):
+            self.write(f"AM:STAT ON")
+        else:
+            self.write(f"AM:STAT OFF")
+
+    def get_amp_mod(self):
+        return bool(int(self.ask(f"AM:STAT?")))
+
+    amp_mod = property(get_amp_mod, set_amp_mod)
+
+    def phase_mod_source(self, value: str):
+        assert value in ["INT", "EXT"]
+        self.write(f"PM:SOUR {value}")

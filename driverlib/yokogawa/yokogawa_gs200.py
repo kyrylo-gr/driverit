@@ -1,4 +1,8 @@
+import time
+import warnings
 from typing import Literal, Optional
+
+import numpy as np
 
 from ..visa_driver import ONOFF_TYPE, VisaDriver
 
@@ -22,6 +26,8 @@ class YokogawaGS200(VisaDriver):
     ```
 
     """
+
+    _precision = 8
 
     mode: Literal["current", "voltage"]
 
@@ -121,3 +127,87 @@ class YokogawaGS200(VisaDriver):
         return self.set_level(value, "current")
 
     current = property(get_current, set_current)
+
+    def set_voltage_safely(self, value: float, step: Optional[float] = None):
+        """Set gradually the voltage from initial value to a given value"""
+        if not self.output:
+            raise ValueError("The output must be on")
+
+        if step is None:
+            step = 0.02
+
+        init = self.voltage
+        if np.round(value, self._precision) == np.round(init, self._precision):
+            return True
+
+        step = abs(step) if init < value else -abs(step)
+
+        for v in np.arange(init, value + step / 2, step):
+            # print(np.round(v, self._precision))
+            self.set_voltage(np.round(v, self._precision))
+        return True
+
+    def set_output_safely(self, value: ONOFF_TYPE):
+        """Set the voltage to 0 before setting the output to True."""
+        if self._value_to_bool(value):
+            if self.output:
+                return False
+            self.voltage = 0
+            self.output = True
+        else:
+            self.output = False
+
+    def set_output_voltage_safely(self, value: float, step: Optional[float] = None):
+        """Set the output to on and set safely the voltage to value with given step."""
+        self.set_output_safely(1)
+        self.set_voltage_safely(value, step)
+
+    def bring_to_voltage(self, value, n_tries: int = 0):
+        """Slowly goes from current voltage to the new voltage"""
+        """If voltage in the end is 0, output turns off"""
+        """n_tries is for inside use, don't change unless you're sure"""
+
+        assert (
+            value <= 1.08 and value >= -1.08
+        ), "voltage must be between 1.08 and -1.08"
+
+        if self.output and self.voltage == value:
+            return None
+
+        if not self.output and self.voltage != 0:
+            self.voltage = 0
+
+        if self.voltage == 0 and value == 0:
+            return None
+
+        self.output = True
+        ini = self.voltage
+        target = ini
+        step = 0.02
+
+        if np.abs(value - ini) <= step:
+            self.voltage = value
+        else:
+            for v in np.arange(
+                ini,
+                value + np.sign(value - ini) * step,
+                np.sign(value - ini) * step,
+            ):
+                if np.sign(v) == 1:
+                    target = np.ceil(1000 * v) / 1000
+                elif np.sign(v) == -1:
+                    target = np.floor(1000 * v) / 1000
+
+                self.voltage = target
+                time.sleep(0.2)
+                if target == value:
+                    break
+
+            if value == 0 and np.abs(self.voltage) <= step * 3 / 2:
+                self.output = False
+        n_tries = n_tries + 1
+        if self.voltage != value:
+            if n_tries < 10:
+                self.bring_to_voltage(value, n_tries)
+            else:
+                print("Couldn't get to precise voltage value after 10 tries!")

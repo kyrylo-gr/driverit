@@ -28,10 +28,10 @@ class KeysightNA(VisaDriver):
         return float(self.ask(":SOUR1:POW?"))
 
     def set_power(self, power):
-        if power < -15:
-            raise ValueError("Minimum power is -15 dBm")
+        if power < -20:
+            raise ValueError("Minimum power is -20 dBm")
         elif power > 0:
-            raise ValueError("Maximum power is -5 dBm")
+            raise ValueError("Maximum power is 0 dBm")
         self.write(f":SOUR1:POW {power}")
 
     power = property(get_power, set_power)
@@ -82,6 +82,10 @@ class KeysightNA(VisaDriver):
         self.write(":INIT1:CONT ON")
         self.write(":TRIG:SOUR BUS")
 
+    def setup_trigger_for_single_sweep(self):
+        self.write(":INIT")
+        self.write(":TRIG:SOUR BUS")
+
     def setup_sweep(
         self,
         f_min: float,
@@ -115,6 +119,17 @@ class KeysightNA(VisaDriver):
         data = self.get_curve()
         return data
 
+    def measure_single(self, *args, **kwargs):
+        if kwargs:
+            self.setup_sweep(*args, **kwargs)
+        else:
+            self.setup_trigger_for_single_sweep()
+        # self.write(":TRIG:SING")
+        while not self.is_completed():
+            time.sleep(1e-3)
+        data = self.get_curve()
+        return data
+
     def get_output(self) -> True:
         """Query the output state of the signal generator.
 
@@ -138,3 +153,81 @@ class KeysightNA(VisaDriver):
 
     def get_sweep_time(self):
         return float(self.ask(":SENS1:SWE:TIME?"))
+
+    def get_ext_trig(self):
+        """Query whether trigger output is enabled.
+
+        Returns:
+            bool: True if the output is enabled, False otherwise.
+        """
+
+        return bool(int(self.ask(":TRIGger:OUTPut?")))
+
+    def set_ext_trig(self, value):
+        """Set the output state of the external trigger."""
+        if self._value_to_bool(value):
+            self.write(":TRIGger:OUTPut ON")
+        else:
+            self.write(":TRIGger:OUTPut OFF")
+
+    ext_trig = property(get_ext_trig, set_ext_trig)
+
+    def get_ext_trig_pos(self):
+        """Query whether trigger output is enabled.
+
+        Returns:
+            Strings 'AFT' if after point, or 'BEF' for before.
+        """
+
+        return self.ask(":TRIGger:OUTPut:POSition?")
+
+    def set_ext_trig_pos(self, value):
+        """Set the output state of the external trigger."""
+        self.write(f":TRIGger:OUTPut:POSition {value}")
+
+    ext_trig_pos = property(get_ext_trig_pos, set_ext_trig_pos)
+
+    def trigger(self):
+        self.write("*TRG")
+
+    def get_start_freq(self):
+        return self.ask(f":SENS1:FREQ:STAR?")
+
+    def set_start_frequency(self, value: float):
+        self.write(f":SENS1:FREQ:STAR {value}")
+
+    start_freq = property(get_start_freq, set_start_frequency)
+
+    def get_stop_freq(self):
+        return self.ask(f":SENS1:FREQ:STOP?")
+
+    def set_stop_freq(self, value: float):
+        self.write(f":SENS1:FREQ:STOP {value}")
+
+    stop_freq = property(get_stop_freq, set_stop_freq)
+
+    def get_trigger_continuous(self):
+        return bool(float(self.ask(":INIT:CONT?")))
+
+    def set_trigger_continuous(self, val: bool):
+        if self._value_to_bool(val):
+            self.write(":INIT:CONT ON")
+        else:
+            self.write(":INIT:CONT OFF")
+
+    trigger_continuous = property(get_trigger_continuous, set_trigger_continuous)
+
+    def set_trigger_single(self):
+        self.trigger_continuous = False
+        self.write(":INIT")
+
+    trigger_continuous = property(get_trigger_continuous, set_trigger_continuous)
+
+    def get_trigger_source(self) -> str:
+        return self.ask(":TRIG:SOUR?")
+
+    def set_trigger_source(self, val: str) -> None:
+        """Takes INT | EXT | MAN | BUS values"""
+        self.write(f":TRIG:SOUR {val}")
+
+    trigger_source = property(get_trigger_source, set_trigger_source)
